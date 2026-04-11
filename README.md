@@ -22,7 +22,7 @@ especialmente jovens e estudantes que estão aprendendo a organizar as finanças
 - Persistência local em arquivo JSON
 
 ## 🛠️ Tecnologias
-- Java 21
+- Java 25
 - Maven 3.9+
 - Gson 2.10.1
 - JUnit Jupiter 5.10.0
@@ -30,7 +30,7 @@ especialmente jovens e estudantes que estão aprendendo a organizar as finanças
 - GitHub Actions (CI)
 
 ## ⚙️ Pré-requisitos
-- Java 21 instalado
+- Java 25 instalado
 - Maven 3.9+ instalado
 
 ## 📦 Instalação
