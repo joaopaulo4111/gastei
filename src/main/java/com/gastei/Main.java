@@ -13,6 +13,10 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         System.out.println("=== 💸 GASTEI - Controle de Gastos Pessoais ===");
 
+        CotacaoService cotacaoService = new CotacaoService();
+        System.out.println("Buscando cotação do dólar...");
+        System.out.println("💵 Cotação atual: " + cotacaoService.buscarCotacaoDolar());
+
         boolean rodando = true;
         while (rodando) {
             System.out.println("\n1. Adicionar gasto");

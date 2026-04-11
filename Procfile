@@ -1,0 +1,1 @@
+worker: java -cp target/gastei-1.0.0.jar com.gastei.Main

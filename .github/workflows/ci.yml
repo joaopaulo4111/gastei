@@ -2,9 +2,9 @@ name: CI - Gastei
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, entrega-intermediaria ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, entrega-intermediaria ]
 
 jobs:
   build:

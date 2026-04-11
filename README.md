@@ -1,6 +1,9 @@
 # 💸 Gastei — Controle de Gastos Pessoais
 
 ![CI](https://github.com/joaopaulo4111/gastei/actions/workflows/ci.yml/badge.svg)
+[![Deploy](https://img.shields.io/badge/deploy-GitHub%20Pages-blue)](https://joaopaulo4111.github.io/gastei)
+
+🌐 **Aplicação publicada:** https://joaopaulo4111.github.io/gastei
 
 ## 📋 Problema Real
 Muitas pessoas têm dificuldade em controlar seus gastos diários, o que leva a
@@ -58,6 +61,13 @@ mvn test
 ```bash
 mvn checkstyle:check
 ```
+## 📸 Evidências de Funcionamento
+
+### ▶️ Aplicação rodando
+![img.png](img.png)
+
+### ✅ Testes passando
+![img_1.png](img_1.png)
 
 ## 📌 Versão
 1.0.0
