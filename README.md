@@ -1,6 +1,6 @@
 # 💸 Gastei — Controle de Gastos Pessoais
 
-![CI](https://github.com/SEU_USUARIO/gastei/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/joaopaulo4111/gastei/actions/workflows/ci.yml/badge.svg)
 
 ## 📋 Problema Real
 Muitas pessoas têm dificuldade em controlar seus gastos diários, o que leva a 
