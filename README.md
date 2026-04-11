@@ -63,7 +63,7 @@ mvn checkstyle:check
 1.0.0
 
 ## 👤 Autor
-João Paulo
+João Paulo Castro dos Santos
 
 ## 🔗 Repositório
 https://github.com/joaopaulo4111/gastei
