@@ -31,7 +31,7 @@ Qualquer pessoa que queira controlar gastos de forma rápida e sem complicação
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/SEU_USUARIO/gastei.git
+git clone https://github.com/joaopaulo4111/gastei.git
 cd gastei
 
 # Compilar
@@ -57,4 +57,4 @@ mvn checkstyle:check
 1.0.0
 
 ## 👤 Autor
-Seu Nome Completo
+João Paulo Castro dos Santos
