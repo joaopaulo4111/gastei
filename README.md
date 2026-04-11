@@ -58,6 +58,13 @@ mvn test
 ```bash
 mvn checkstyle:check
 ```
+## 📸 Evidências de Funcionamento
+
+### ▶️ Aplicação rodando
+![img.png](img.png)
+
+### ✅ Testes passando
+![img_1.png](img_1.png)
 
 ## 📌 Versão
 1.0.0
