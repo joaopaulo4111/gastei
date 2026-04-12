@@ -2,16 +2,20 @@ name: CI - Gastei
 
 on:
   push:
-    branches: [ main, entrega-intermediaria ]
+    branches:
+      - main
+      - entrega-intermediaria
+      - feature/interface-web-supabase
   pull_request:
-    branches: [ main, entrega-intermediaria ]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
+      - name: Checkout código
         uses: actions/checkout@v4
 
       - name: Configurar Java 21
@@ -21,16 +25,18 @@ jobs:
           distribution: 'temurin'
 
       - name: Cache Maven
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ~/.m2
+          path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-      - name: Compilar o projeto
-        run: mvn compile
+      - name: Compilar
+        run: mvn compile --no-transfer-progress
 
-      - name: Executar Checkstyle (lint)
-        run: mvn checkstyle:check
+      - name: Rodar testes
+        run: mvn test --no-transfer-progress
 
-      - name: Executar testes
-        run: mvn test
+      - name: Verificar Checkstyle
+        run: mvn checkstyle:check --no-transfer-progress
