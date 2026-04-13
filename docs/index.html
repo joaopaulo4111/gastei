@@ -3,45 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gastei - Controle de Gastos Pessoais</title>
+    <title>Gastei - Controle de Gastos</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #0d1117; color: #c9d1d9; }
-        h1 { color: #58a6ff; }
-        h2 { color: #79c0ff; border-bottom: 1px solid #30363d; padding-bottom: 8px; }
-        code { background: #161b22; padding: 2px 6px; border-radius: 4px; color: #ff7b72; }
-        pre { background: #161b22; padding: 16px; border-radius: 8px; overflow-x: auto; }
-        .badge { background: #238636; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
-        a { color: #58a6ff; }
-        .feature { background: #161b22; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 3px solid #58a6ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        header { background: linear-gradient(135deg, #1e3a5f, #2d6a4f); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        header h1 { font-size: 1.8rem; color: #fff; }
+        .cotacao { background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; color: #a7f3d0; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+        .cards-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+        .card { background: #1e293b; border-radius: 12px; padding: 20px; border-left: 4px solid; }
+        .card.credito { border-color: #f59e0b; }
+        .card.debito { border-color: #ef4444; }
+        .card.pix { border-color: #8b5cf6; }
+        .card.dinheiro { border-color: #10b981; }
+        .card h3 { font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; }
+        .card .valor { font-size: 1.5rem; font-weight: bold; }
+        .card.credito .valor { color: #f59e0b; }
+        .card.debito .valor { color: #ef4444; }
+        .card.pix .valor { color: #8b5cf6; }
+        .card.dinheiro .valor { color: #10b981; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; }
+        .form-card { background: #1e293b; border-radius: 12px; padding: 24px; }
+        .form-card h2 { margin-bottom: 20px; color: #7dd3fc; font-size: 1.1rem; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; }
+        input, select { width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; transition: border-color 0.2s; }
+        input:focus, select:focus { outline: none; border-color: #3b82f6; }
+        .parcelas-group { display: none; }
+        .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 8px; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .lista-card { background: #1e293b; border-radius: 12px; padding: 24px; }
+        .lista-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .lista-header h2 { color: #7dd3fc; font-size: 1.1rem; }
+        .filtro-mes { padding: 8px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.85rem; }
+        .gasto-item { background: #0f172a; border-radius: 8px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid; }
+        .gasto-item.credito { border-color: #f59e0b; }
+        .gasto-item.debito { border-color: #ef4444; }
+        .gasto-item.pix { border-color: #8b5cf6; }
+        .gasto-item.dinheiro { border-color: #10b981; }
+        .gasto-info h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .gasto-info span { font-size: 0.8rem; color: #64748b; }
+        .gasto-valor { font-weight: bold; font-size: 1rem; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 8px; }
+        .badge.credito { background: #451a03; color: #f59e0b; }
+        .badge.debito { background: #450a0a; color: #ef4444; }
+        .badge.pix { background: #2e1065; color: #8b5cf6; }
+        .badge.dinheiro { background: #022c22; color: #10b981; }
+        .empty { text-align: center; color: #475569; padding: 40px; }
+        .fatura-section { background: #1e293b; border-radius: 12px; padding: 24px; margin-top: 24px; }
+        .fatura-section h2 { color: #f59e0b; margin-bottom: 16px; font-size: 1.1rem; }
+        .fatura-total { font-size: 2rem; font-weight: bold; color: #f59e0b; }
+        .loading { text-align: center; color: #475569; padding: 20px; }
+        .btn-deletar { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 4px; }
+        .btn-deletar:hover { background: #450a0a; }
     </style>
 </head>
 <body>
-<h1>💸 Gastei</h1>
-<p><span class="badge">✅ v1.0.0</span></p>
-<p>Aplicação CLI em Java para controle de gastos pessoais com cotação do dólar em tempo real.</p>
 
-<h2>📋 Problema Real</h2>
-<p>Muitas pessoas perdem o controle financeiro por não registrar gastos no dia a dia. O Gastei resolve isso de forma simples e rápida.</p>
+<header>
+    <h1>💸 Gastei</h1>
+    <div class="cotacao" id="cotacao">💵 Carregando cotação...</div>
+</header>
 
-<h2>✅ Funcionalidades</h2>
-<div class="feature">💰 Adicionar gastos com descrição, valor e categoria</div>
-<div class="feature">📋 Listar todos os gastos registrados</div>
-<div class="feature">📊 Ver o total gasto</div>
-<div class="feature">💵 Cotação do dólar em tempo real via AwesomeAPI</div>
-<div class="feature">💾 Persistência local em arquivo JSON</div>
+<div class="container">
+    <div class="cards-resumo">
+        <div class="card credito">
+            <h3>💳 Crédito (mês atual)</h3>
+            <div class="valor" id="total-credito">R$ 0,00</div>
+        </div>
+        <div class="card debito">
+            <h3>🏦 Débito</h3>
+            <div class="valor" id="total-debito">R$ 0,00</div>
+        </div>
+        <div class="card pix">
+            <h3>⚡ PIX</h3>
+            <div class="valor" id="total-pix">R$ 0,00</div>
+        </div>
+        <div class="card dinheiro">
+            <h3>💵 Dinheiro</h3>
+            <div class="valor" id="total-dinheiro">R$ 0,00</div>
+        </div>
+    </div>
 
-<h2>⚙️ Como executar</h2>
-<pre>git clone https://github.com/joaopaulo4111/gastei.git
-cd gastei
-mvn compile exec:java "-Dexec.mainClass=com.gastei.Main"</pre>
+    <div class="main-grid">
+        <div class="form-card">
+            <h2>➕ Adicionar Gasto</h2>
+            <div class="form-group">
+                <label>Descrição</label>
+                <input type="text" id="descricao" placeholder="Ex: Supermercado">
+            </div>
+            <div class="form-group">
+                <label>Valor Total (R$)</label>
+                <input type="number" id="valor" placeholder="0.00" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+                <label>Categoria</label>
+                <select id="categoria">
+                    <option value="Alimentação">🍔 Alimentação</option>
+                    <option value="Transporte">🚗 Transporte</option>
+                    <option value="Saúde">💊 Saúde</option>
+                    <option value="Lazer">🎮 Lazer</option>
+                    <option value="Educação">📚 Educação</option>
+                    <option value="Moradia">🏠 Moradia</option>
+                    <option value="Outros">📦 Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Forma de Pagamento</label>
+                <select id="tipo" onchange="toggleParcelas()">
+                    <option value="debito">🏦 Débito</option>
+                    <option value="credito">💳 Crédito</option>
+                    <option value="pix">⚡ PIX</option>
+                    <option value="dinheiro">💵 Dinheiro</option>
+                </select>
+            </div>
+            <div class="form-group parcelas-group" id="parcelas-group">
+                <label>Número de Parcelas</label>
+                <select id="parcelas">
+                    <option value="1">1x (à vista)</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                    <option value="4">4x</option>
+                    <option value="5">5x</option>
+                    <option value="6">6x</option>
+                    <option value="10">10x</option>
+                    <option value="12">12x</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Mês de Referência</label>
+                <input type="month" id="mes" value="">
+            </div>
+            <button class="btn" onclick="adicionarGasto()">➕ Adicionar Gasto</button>
+        </div>
 
-<h2>🧪 Rodar testes</h2>
-<pre>mvn test</pre>
+        <div class="lista-card">
+            <div class="lista-header">
+                <h2>📋 Gastos do Mês</h2>
+                <input type="month" id="filtro-mes" class="filtro-mes" onchange="carregarGastos()">
+            </div>
+            <div id="lista-gastos"><div class="loading">Carregando...</div></div>
+        </div>
+    </div>
 
-<h2>🔗 Repositório</h2>
-<a href="https://github.com/joaopaulo4111/gastei" target="_blank">https://github.com/joaopaulo4111/gastei</a>
+    <div class="fatura-section">
+        <h2>💳 Fatura do Cartão de Crédito</h2>
+        <p style="color:#94a3b8; margin-bottom:12px; font-size:0.9rem;">
+            Total de parcelas de crédito vencendo no mês selecionado
+        </p>
+        <div class="fatura-total" id="fatura-total">R$ 0,00</div>
+    </div>
+</div>
 
-<h2>👤 Autor</h2>
-<p>João Paulo Castro dos Santos</p>
+<script>
+    const SUPABASE_URL = 'https://okbgjyaxvnsceuumcwyi.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_lba9fV5K4FHuZlLezT2sDA_8yRXISmS';
+
+    const hoje = new Date();
+    const mesAtual = hoje.toISOString().slice(0, 7);
+    document.getElementById('mes').value = mesAtual;
+    document.getElementById('filtro-mes').value = mesAtual;
+
+    async function carregarCotacao() {
+        try {
+            const res = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL');
+            const data = await res.json();
+            const valor = parseFloat(data.USDBRL.bid).toFixed(2);
+            document.getElementById('cotacao').textContent = `💵 USD 1,00 = R$ ${valor}`;
+        } catch {
+            document.getElementById('cotacao').textContent = '💵 Cotação indisponível';
+        }
+    }
+
+    function toggleParcelas() {
+        const tipo = document.getElementById('tipo').value;
+        document.getElementById('parcelas-group').style.display =
+            tipo === 'credito' ? 'block' : 'none';
+    }
+
+    async function adicionarGasto() {
+        const descricao = document.getElementById('descricao').value.trim();
+        const valor = parseFloat(document.getElementById('valor').value);
+        const categoria = document.getElementById('categoria').value;
+        const tipo = document.getElementById('tipo').value;
+        const mes = document.getElementById('mes').value;
+        const totalParcelas = tipo === 'credito'
+            ? parseInt(document.getElementById('parcelas').value) : 1;
+
+        if (!descricao || !valor || valor <= 0 || !mes) {
+            alert('Preencha todos os campos corretamente!');
+            return;
+        }
+
+        const valorParcela = parseFloat((valor / totalParcelas).toFixed(2));
+        const [ano, mesNum] = mes.split('-').map(Number);
+
+        const gastos = [];
+        for (let i = 0; i < totalParcelas; i++) {
+            const d = new Date(ano, mesNum - 1 + i, 1);
+            const mesRef = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+            gastos.push({
+                descricao: totalParcelas > 1
+                    ? `${descricao} (${i+1}/${totalParcelas})` : descricao,
+                valor: valorParcela,
+                categoria,
+                tipo_pagamento: tipo,
+                parcela_atual: i + 1,
+                total_parcelas: totalParcelas,
+                mes_referencia: mesRef
+            });
+        }
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/gastos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            },
+            body: JSON.stringify(gastos)
+        });
+
+        if (res.ok) {
+            document.getElementById('descricao').value = '';
+            document.getElementById('valor').value = '';
+            carregarGastos();
+        } else {
+            const erro = await res.text();
+            alert('Erro ao salvar: ' + erro);
+        }
+    }
+
+    async function deletarGasto(id) {
+        if (!confirm('Deseja remover este gasto?')) return;
+        await fetch(`${SUPABASE_URL}/rest/v1/gastos?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+        carregarGastos();
+    }
+
+    async function carregarGastos() {
+        const mes = document.getElementById('filtro-mes').value;
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/gastos?mes_referencia=eq.${mes}&order=data_lancamento.desc`,
+            { headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                }}
+        );
+        const gastos = await res.json();
+
+        const lista = document.getElementById('lista-gastos');
+        if (!gastos.length) {
+            lista.innerHTML = '<div class="empty">Nenhum gasto registrado neste mês 😊</div>';
+        } else {
+            lista.innerHTML = gastos.map(g => `
+                <div class="gasto-item ${g.tipo_pagamento}">
+                    <div class="gasto-info">
+                        <h4>${g.descricao}
+                            <span class="badge ${g.tipo_pagamento}">${g.tipo_pagamento}</span>
+                        </h4>
+                        <span>${g.categoria} • ${g.mes_referencia}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="gasto-valor">
+                            R$ ${parseFloat(g.valor).toFixed(2).replace('.', ',')}
+                        </div>
+                        <button class="btn-deletar" onclick="deletarGasto(${g.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        const tipos = ['credito', 'debito', 'pix', 'dinheiro'];
+        tipos.forEach(t => {
+            const total = gastos
+                .filter(g => g.tipo_pagamento === t)
+                .reduce((s, g) => s + parseFloat(g.valor), 0);
+            document.getElementById(`total-${t}`).textContent =
+                `R$ ${total.toFixed(2).replace('.', ',')}`;
+        });
+
+        const fatura = gastos
+            .filter(g => g.tipo_pagamento === 'credito')
+            .reduce((s, g) => s + parseFloat(g.valor), 0);
+        document.getElementById('fatura-total').textContent =
+            `R$ ${fatura.toFixed(2).replace('.', ',')}`;
+    }
+
+    carregarCotacao();
+    carregarGastos();
+</script>
 </body>
 </html>

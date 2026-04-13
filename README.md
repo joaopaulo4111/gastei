@@ -11,18 +11,23 @@ desequilíbrios financeiros ao final do mês. A falta de registro simples e aces
 contribui para o endividamento e a desorganização financeira.
 
 ## 💡 Solução
-Aplicação CLI simples que permite registrar, listar e totalizar gastos pessoais,
-salvando os dados localmente em arquivo JSON.
+Aplicação web com interface moderna que permite registrar, categorizar e totalizar
+gastos pessoais por forma de pagamento, com suporte a parcelamento no crédito e
+visualização da fatura mensal. Os dados são salvos em banco de dados na nuvem (Supabase).
 
 ## 👥 Público-alvo
 Qualquer pessoa que queira controlar gastos de forma rápida e sem complicação,
 especialmente jovens e estudantes que estão aprendendo a organizar as finanças.
 
 ## ✅ Funcionalidades
-- Adicionar gasto (descrição, valor, categoria)
-- Listar todos os gastos registrados
-- Ver o total gasto
-- Persistência local em arquivo JSON
+- Adicionar gastos com descrição, valor e categoria
+- Separação por forma de pagamento: Crédito, Débito, PIX e Dinheiro
+- Parcelamento no crédito com lançamento automático mês a mês
+- Visualização da fatura mensal do cartão de crédito
+- Resumo dos gastos por tipo de pagamento
+- Cotação do dólar em tempo real via AwesomeAPI
+- Persistência de dados em banco de dados PostgreSQL na nuvem (Supabase)
+- Interface web moderna e responsiva
 
 ## 🛠️ Tecnologias
 - Java 21
@@ -31,6 +36,10 @@ especialmente jovens e estudantes que estão aprendendo a organizar as finanças
 - JUnit Jupiter 5.10.0
 - Checkstyle (linting)
 - GitHub Actions (CI)
+- Supabase (PostgreSQL na nuvem)
+- HTML / CSS / JavaScript (interface web)
+- AwesomeAPI (cotação de moedas)
+- GitHub Pages (deploy)
 
 ## ⚙️ Pré-requisitos
 - Java 21 instalado
@@ -44,11 +53,16 @@ cd gastei
 mvn compile
 ```
 
-## ▶️ Como executar
+## ▶️ Como executar (CLI)
 
 ```bash
 mvn exec:java "-Dexec.mainClass=com.gastei.Main"
 ```
+
+## 🌐 Como usar (Interface Web)
+
+Acesse diretamente pelo navegador:
+👉 https://joaopaulo4111.github.io/gastei
 
 ## 🧪 Rodar os testes
 
@@ -61,19 +75,20 @@ mvn test
 ```bash
 mvn checkstyle:check
 ```
-## 📸 Evidências de Funcionamento
 
-### ▶️ Aplicação rodando
-![img.png](img.png)
+## 🗄️ Banco de Dados
+O projeto utiliza **Supabase** (PostgreSQL na nuvem) para persistência dos dados.
+A tabela `gastos` armazena descrição, valor, categoria, tipo de pagamento,
+parcelas e mês de referência.
 
-### ✅ Testes passando
-![img_1.png](img_1.png)
+## 👥 Integrantes
+| Nome | GitHub |
+|------|-------|
+| João Paulo Castro dos Santos | [@joaopaulo4111](https://github.com/joaopaulo4111) |
+| Lucas Gabriel Castro dos Santos | [@lucas-castro5](https://github.com/lucas-castro5) |
 
 ## 📌 Versão
 1.0.0
-
-## 👤 Autor
-João Paulo Castro dos Santos
 
 ## 🔗 Repositório
 https://github.com/joaopaulo4111/gastei
