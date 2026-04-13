@@ -88,7 +88,7 @@ parcelas e mês de referência.
 | Lucas Gabriel Castro dos Santos | [@lucas-castro5](https://github.com/lucas-castro5) |
 
 ## 📌 Versão
-1.0.0
+1.0.1
 
 ## 🔗 Repositório
 https://github.com/joaopaulo4111/gastei
