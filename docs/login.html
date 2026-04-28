@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gastei - Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { width: 100%; max-width: 400px; padding: 20px; }
+        .card { background: #1e293b; border-radius: 16px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { font-size: 2.5rem; margin-bottom: 8px; }
+        .logo p { color: #94a3b8; font-size: 0.95rem; }
+        .tabs { display: flex; margin-bottom: 24px; background: #0f172a; border-radius: 8px; padding: 4px; }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 0.9rem; color: #64748b; transition: all 0.2s; border: none; background: none; }
+        .tab.active { background: #3b82f6; color: white; font-weight: bold; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; }
+        input { width: 100%; padding: 12px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; transition: border-color 0.2s; }
+        input:focus { outline: none; border-color: #3b82f6; }
+        .btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 8px; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s; margin-top: 8px; }
+        .btn:hover { opacity: 0.9; }
+        .msg { text-align: center; margin-top: 16px; font-size: 0.9rem; padding: 10px; border-radius: 8px; display: none; }
+        .msg.erro { background: #450a0a; color: #ef4444; display: block; }
+        .msg.sucesso { background: #022c22; color: #10b981; display: block; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="logo">
+            <h1>💸 Gastei</h1>
+            <p>Controle seus gastos com facilidade</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="trocarAba('login')">Entrar</button>
+            <button class="tab" onclick="trocarAba('cadastro')">Cadastrar</button>
+        </div>
+
+        <!-- Login -->
+        <div id="form-login">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="login-senha" placeholder="••••••••">
+            </div>
+            <button class="btn" onclick="fazerLogin()">Entrar</button>
+            <div id="msg-login" class="msg"></div>
+        </div>
+
+        <!-- Cadastro -->
+        <div id="form-cadastro" style="display:none;">
+            <div class="form-group">
+                <label>Nome</label>
+                <input type="text" id="cad-nome" placeholder="Seu nome completo">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="cad-email" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres">
+            </div>
+            <button class="btn" onclick="fazerCadastro()">Criar Conta</button>
+            <div id="msg-cadastro" class="msg"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://okbgjyaxvnsceuumcwyi.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_lba9fV5K4FHuZlLezT2sDA_8yRXISmS';
+
+    // Se já estiver logado, redireciona
+    if (localStorage.getItem('gastei_usuario')) {
+        window.location.href = 'index.html';
+    }
+
+    function trocarAba(aba) {
+        document.getElementById('form-login').style.display = aba === 'login' ? 'block' : 'none';
+        document.getElementById('form-cadastro').style.display = aba === 'cadastro' ? 'block' : 'none';
+        document.querySelectorAll('.tab').forEach((t, i) => {
+            t.classList.toggle('active', (aba === 'login' && i === 0) || (aba === 'cadastro' && i === 1));
+        });
+    }
+
+    async function fazerCadastro() {
+        const nome = document.getElementById('cad-nome').value.trim();
+        const email = document.getElementById('cad-email').value.trim();
+        const senha = document.getElementById('cad-senha').value;
+        const msg = document.getElementById('msg-cadastro');
+
+        if (!nome || !email || !senha || senha.length < 6) {
+            msg.className = 'msg erro';
+            msg.textContent = 'Preencha todos os campos. Senha mínimo 6 caracteres.';
+            return;
+        }
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            },
+            body: JSON.stringify({ nome, email, senha })
+        });
+
+        if (res.ok) {
+            msg.className = 'msg sucesso';
+            msg.textContent = '✅ Conta criada! Faça login agora.';
+            setTimeout(() => trocarAba('login'), 2000);
+        } else {
+            msg.className = 'msg erro';
+            msg.textContent = '❌ Email já cadastrado ou erro ao criar conta.';
+        }
+    }
+
+    async function fazerLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const senha = document.getElementById('login-senha').value;
+        const msg = document.getElementById('msg-login');
+
+        if (!email || !senha) {
+            msg.className = 'msg erro';
+            msg.textContent = 'Preencha email e senha.';
+            return;
+        }
+
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/usuarios?email=eq.${email}&senha=eq.${senha}&select=*`,
+            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
+        );
+        const usuarios = await res.json();
+
+        if (usuarios.length > 0) {
+            localStorage.setItem('gastei_usuario', JSON.stringify(usuarios[0]));
+            msg.className = 'msg sucesso';
+            msg.textContent = `✅ Bem-vindo, ${usuarios[0].nome}!`;
+            setTimeout(() => window.location.href = 'index.html', 1000);
+        } else {
+            msg.className = 'msg erro';
+            msg.textContent = '❌ Email ou senha incorretos.';
+        }
+    }
+</script>
+</body>
+</html>

@@ -159,7 +159,18 @@
 <script>
     const SUPABASE_URL = 'https://okbgjyaxvnsceuumcwyi.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_lba9fV5K4FHuZlLezT2sDA_8yRXISmS';
+    // Verifica login
+    const usuario = localStorage.getItem('gastei_usuario');
+    if (!usuario) window.location.href = 'login.html';
 
+    // Botão de logout no header
+    document.querySelector('header').insertAdjacentHTML('beforeend', 
+        `<button onclick="logout()" style="background:rgba(255,255,255,0.1);border:none;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;">Sair</button>`
+    );
+    function logout() {
+        localStorage.removeItem('gastei_usuario');
+        window.location.href = 'login.html';
+    }
     const hoje = new Date();
     const mesAtual = hoje.toISOString().slice(0, 7);
     document.getElementById('mes').value = mesAtual;
