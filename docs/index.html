@@ -9,20 +9,45 @@
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
         header { background: linear-gradient(135deg, #1e3a5f, #2d6a4f); padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         header h1 { font-size: 1.8rem; color: #fff; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
         .cotacao { background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; color: #a7f3d0; }
+        .btn-sair { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
+        .btn-sair:hover { background: rgba(255,255,255,0.2); }
+        .usuario-nome { font-size: 0.9rem; color: #a7f3d0; }
         .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
-        .cards-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+
+        /* Cards resumo */
+        .cards-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
         .card { background: #1e293b; border-radius: 12px; padding: 20px; border-left: 4px solid; }
         .card.credito { border-color: #f59e0b; }
         .card.debito { border-color: #ef4444; }
         .card.pix { border-color: #8b5cf6; }
         .card.dinheiro { border-color: #10b981; }
+        .card.renda { border-color: #22d3ee; }
+        .card.saldo.positivo { border-color: #10b981; }
+        .card.saldo.negativo { border-color: #ef4444; }
         .card h3 { font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; }
         .card .valor { font-size: 1.5rem; font-weight: bold; }
         .card.credito .valor { color: #f59e0b; }
         .card.debito .valor { color: #ef4444; }
         .card.pix .valor { color: #8b5cf6; }
         .card.dinheiro .valor { color: #10b981; }
+        .card.renda .valor { color: #22d3ee; }
+        .valor.positivo { color: #10b981; }
+        .valor.negativo { color: #ef4444; }
+
+        /* Renda section */
+        .renda-section { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #22d3ee; }
+        .renda-section h2 { color: #22d3ee; font-size: 1rem; margin-bottom: 12px; }
+        .renda-form { display: flex; gap: 12px; align-items: flex-end; }
+        .renda-form .form-group { flex: 1; margin: 0; }
+        .renda-form label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; }
+        .renda-form input { width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; }
+        .renda-form input:focus { outline: none; border-color: #22d3ee; }
+        .btn-renda { padding: 10px 20px; background: linear-gradient(135deg, #22d3ee, #0891b2); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .btn-renda:hover { opacity: 0.9; }
+
+        /* Main grid */
         .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; }
         .form-card { background: #1e293b; border-radius: 12px; padding: 24px; }
         .form-card h2 { margin-bottom: 20px; color: #7dd3fc; font-size: 1.1rem; }
@@ -63,13 +88,27 @@
 
 <header>
     <h1>💸 Gastei</h1>
-    <div class="cotacao" id="cotacao">💵 Carregando cotação...</div>
+    <div class="header-right">
+        <div class="cotacao" id="cotacao">💵 Carregando cotação...</div>
+        <span class="usuario-nome" id="usuario-nome"></span>
+        <button class="btn-sair" onclick="logout()">Sair</button>
+    </div>
 </header>
 
 <div class="container">
+
+    <!-- Cards resumo -->
     <div class="cards-resumo">
+        <div class="card renda">
+            <h3>💰 Renda do Mês</h3>
+            <div class="valor" id="total-renda">R$ 0,00</div>
+        </div>
+        <div class="card saldo" id="card-saldo">
+            <h3>📊 Saldo Restante</h3>
+            <div class="valor" id="total-saldo">R$ 0,00</div>
+        </div>
         <div class="card credito">
-            <h3>💳 Crédito (mês atual)</h3>
+            <h3>💳 Crédito</h3>
             <div class="valor" id="total-credito">R$ 0,00</div>
         </div>
         <div class="card debito">
@@ -83,6 +122,22 @@
         <div class="card dinheiro">
             <h3>💵 Dinheiro</h3>
             <div class="valor" id="total-dinheiro">R$ 0,00</div>
+        </div>
+    </div>
+
+    <!-- Renda mensal -->
+    <div class="renda-section">
+        <h2>💰 Renda Mensal</h2>
+        <div class="renda-form">
+            <div class="form-group">
+                <label>Valor que você recebeu este mês (R$)</label>
+                <input type="number" id="renda-valor" placeholder="Ex: 3000.00" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+                <label>Mês</label>
+                <input type="month" id="renda-mes">
+            </div>
+            <button class="btn-renda" onclick="salvarRenda()">💾 Salvar Renda</button>
         </div>
     </div>
 
@@ -141,7 +196,7 @@
         <div class="lista-card">
             <div class="lista-header">
                 <h2>📋 Gastos do Mês</h2>
-                <input type="month" id="filtro-mes" class="filtro-mes" onchange="carregarGastos()">
+                <input type="month" id="filtro-mes" class="filtro-mes" onchange="carregarTudo()">
             </div>
             <div id="lista-gastos"><div class="loading">Carregando...</div></div>
         </div>
@@ -159,22 +214,24 @@
 <script>
     const SUPABASE_URL = 'https://okbgjyaxvnsceuumcwyi.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_lba9fV5K4FHuZlLezT2sDA_8yRXISmS';
-    // Verifica login
-    const usuario = localStorage.getItem('gastei_usuario');
-    if (!usuario) window.location.href = 'login.html';
 
-    // Botão de logout no header
-    document.querySelector('header').insertAdjacentHTML('beforeend', 
-        `<button onclick="logout()" style="background:rgba(255,255,255,0.1);border:none;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;">Sair</button>`
-    );
+    // Verifica login
+    const usuarioLogado = JSON.parse(localStorage.getItem('gastei_usuario'));
+    if (!usuarioLogado) window.location.href = 'login.html';
+
+    // Mostra nome do usuário no header
+    document.getElementById('usuario-nome').textContent = `👤 ${usuarioLogado.nome}`;
+
     function logout() {
         localStorage.removeItem('gastei_usuario');
         window.location.href = 'login.html';
     }
+
     const hoje = new Date();
     const mesAtual = hoje.toISOString().slice(0, 7);
     document.getElementById('mes').value = mesAtual;
     document.getElementById('filtro-mes').value = mesAtual;
+    document.getElementById('renda-mes').value = mesAtual;
 
     async function carregarCotacao() {
         try {
@@ -191,6 +248,71 @@
         const tipo = document.getElementById('tipo').value;
         document.getElementById('parcelas-group').style.display =
             tipo === 'credito' ? 'block' : 'none';
+    }
+
+    async function salvarRenda() {
+        const valor = parseFloat(document.getElementById('renda-valor').value);
+        const mes = document.getElementById('renda-mes').value;
+
+        if (!valor || valor <= 0 || !mes) {
+            alert('Informe um valor válido para a renda!');
+            return;
+        }
+
+        // Tenta atualizar primeiro, se não existir insere
+        const resCheck = await fetch(
+            `${SUPABASE_URL}/rest/v1/rendas?usuario_id=eq.${usuarioLogado.id}&mes_referencia=eq.${mes}`,
+            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
+        );
+        const rendaExistente = await resCheck.json();
+
+        let res;
+        if (rendaExistente.length > 0) {
+            // Atualiza
+            res = await fetch(
+                `${SUPABASE_URL}/rest/v1/rendas?usuario_id=eq.${usuarioLogado.id}&mes_referencia=eq.${mes}`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: JSON.stringify({ valor })
+                }
+            );
+        } else {
+            // Insere
+            res = await fetch(`${SUPABASE_URL}/rest/v1/rendas`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                },
+                body: JSON.stringify({
+                    usuario_id: usuarioLogado.id,
+                    valor,
+                    mes_referencia: mes
+                })
+            });
+        }
+
+        if (res.ok) {
+            alert('✅ Renda salva com sucesso!');
+            carregarTudo();
+        } else {
+            alert('❌ Erro ao salvar renda.');
+        }
+    }
+
+    async function carregarRenda(mes) {
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/rendas?usuario_id=eq.${usuarioLogado.id}&mes_referencia=eq.${mes}`,
+            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
+        );
+        const rendas = await res.json();
+        return rendas.length > 0 ? parseFloat(rendas[0].valor) : 0;
     }
 
     async function adicionarGasto() {
@@ -222,7 +344,8 @@
                 tipo_pagamento: tipo,
                 parcela_atual: i + 1,
                 total_parcelas: totalParcelas,
-                mes_referencia: mesRef
+                mes_referencia: mesRef,
+                usuario_id: usuarioLogado.id
             });
         }
 
@@ -239,7 +362,7 @@
         if (res.ok) {
             document.getElementById('descricao').value = '';
             document.getElementById('valor').value = '';
-            carregarGastos();
+            carregarTudo();
         } else {
             const erro = await res.text();
             alert('Erro ao salvar: ' + erro);
@@ -255,20 +378,45 @@
                 'Authorization': `Bearer ${SUPABASE_KEY}`
             }
         });
-        carregarGastos();
+        carregarTudo();
     }
 
-    async function carregarGastos() {
+    async function carregarTudo() {
         const mes = document.getElementById('filtro-mes').value;
-        const res = await fetch(
-            `${SUPABASE_URL}/rest/v1/gastos?mes_referencia=eq.${mes}&order=data_lancamento.desc`,
-            { headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                }}
-        );
-        const gastos = await res.json();
 
+        // Carrega renda e gastos em paralelo
+        const [renda, gastos] = await Promise.all([
+            carregarRenda(mes),
+            fetch(
+                `${SUPABASE_URL}/rest/v1/gastos?mes_referencia=eq.${mes}&usuario_id=eq.${usuarioLogado.id}&order=data_lancamento.desc`,
+                { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
+            ).then(r => r.json())
+        ]);
+
+        // Atualiza campo de renda
+        document.getElementById('renda-valor').value = renda > 0 ? renda : '';
+        document.getElementById('total-renda').textContent =
+            `R$ ${renda.toFixed(2).replace('.', ',')}`;
+
+        // Calcula total de gastos
+        const totalGastos = gastos.reduce((s, g) => s + parseFloat(g.valor), 0);
+
+        // Calcula saldo
+        const saldo = renda - totalGastos;
+        const saldoEl = document.getElementById('total-saldo');
+        const cardSaldo = document.getElementById('card-saldo');
+        saldoEl.textContent = `R$ ${Math.abs(saldo).toFixed(2).replace('.', ',')}`;
+        if (saldo >= 0) {
+            saldoEl.className = 'valor positivo';
+            cardSaldo.className = 'card saldo positivo';
+            document.querySelector('#card-saldo h3').textContent = '📊 Saldo Restante';
+        } else {
+            saldoEl.className = 'valor negativo';
+            cardSaldo.className = 'card saldo negativo';
+            document.querySelector('#card-saldo h3').textContent = '⚠️ Saldo Negativo';
+        }
+
+        // Lista gastos
         const lista = document.getElementById('lista-gastos');
         if (!gastos.length) {
             lista.innerHTML = '<div class="empty">Nenhum gasto registrado neste mês 😊</div>';
@@ -291,6 +439,7 @@
             `).join('');
         }
 
+        // Totais por tipo
         const tipos = ['credito', 'debito', 'pix', 'dinheiro'];
         tipos.forEach(t => {
             const total = gastos
@@ -300,6 +449,7 @@
                 `R$ ${total.toFixed(2).replace('.', ',')}`;
         });
 
+        // Fatura crédito
         const fatura = gastos
             .filter(g => g.tipo_pagamento === 'credito')
             .reduce((s, g) => s + parseFloat(g.valor), 0);
@@ -308,7 +458,7 @@
     }
 
     carregarCotacao();
-    carregarGastos();
+    carregarTudo();
 </script>
 </body>
 </html>
