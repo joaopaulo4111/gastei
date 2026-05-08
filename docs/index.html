@@ -16,7 +16,6 @@
         .usuario-nome { font-size: 0.9rem; color: #a7f3d0; }
         .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
 
-        /* Cards resumo */
         .cards-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
         .card { background: #1e293b; border-radius: 12px; padding: 20px; border-left: 4px solid; }
         .card.credito { border-color: #f59e0b; }
@@ -38,16 +37,19 @@
 
         /* Renda section */
         .renda-section { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #22d3ee; }
-        .renda-section h2 { color: #22d3ee; font-size: 1rem; margin-bottom: 12px; }
+        .renda-section h2 { color: #22d3ee; font-size: 1rem; margin-bottom: 4px; }
+        .renda-section .renda-atual { font-size: 0.85rem; color: #64748b; margin-bottom: 14px; }
         .renda-form { display: flex; gap: 12px; align-items: flex-end; }
         .renda-form .form-group { flex: 1; margin: 0; }
         .renda-form label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; }
         .renda-form input { width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; }
         .renda-form input:focus { outline: none; border-color: #22d3ee; }
-        .btn-renda { padding: 10px 20px; background: linear-gradient(135deg, #22d3ee, #0891b2); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; white-space: nowrap; }
-        .btn-renda:hover { opacity: 0.9; }
+        .renda-btns { display: flex; gap: 8px; }
+        .btn-adicionar-renda { padding: 10px 18px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .btn-adicionar-renda:hover { opacity: 0.9; }
+        .btn-subtrair-renda { padding: 10px 18px; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .btn-subtrair-renda:hover { opacity: 0.9; }
 
-        /* Main grid */
         .main-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; }
         .form-card { background: #1e293b; border-radius: 12px; padding: 24px; }
         .form-card h2 { margin-bottom: 20px; color: #7dd3fc; font-size: 1.1rem; }
@@ -97,7 +99,6 @@
 
 <div class="container">
 
-    <!-- Cards resumo -->
     <div class="cards-resumo">
         <div class="card renda">
             <h3>💰 Renda do Mês</h3>
@@ -128,16 +129,20 @@
     <!-- Renda mensal -->
     <div class="renda-section">
         <h2>💰 Renda Mensal</h2>
+        <p class="renda-atual" id="renda-atual-texto">Renda atual do mês: R$ 0,00</p>
         <div class="renda-form">
             <div class="form-group">
-                <label>Valor que você recebeu este mês (R$)</label>
-                <input type="number" id="renda-valor" placeholder="Ex: 3000.00" step="0.01" min="0">
+                <label>Valor (R$)</label>
+                <input type="number" id="renda-valor" placeholder="Ex: 500.00" step="0.01" min="0">
             </div>
             <div class="form-group">
                 <label>Mês</label>
                 <input type="month" id="renda-mes">
             </div>
-            <button class="btn-renda" onclick="salvarRenda()">💾 Salvar Renda</button>
+            <div class="renda-btns">
+                <button class="btn-adicionar-renda" onclick="ajustarRenda('adicionar')">➕ Adicionar</button>
+                <button class="btn-subtrair-renda" onclick="ajustarRenda('subtrair')">➖ Subtrair</button>
+            </div>
         </div>
     </div>
 
@@ -215,11 +220,9 @@
     const SUPABASE_URL = 'https://okbgjyaxvnsceuumcwyi.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_lba9fV5K4FHuZlLezT2sDA_8yRXISmS';
 
-    // Verifica login
     const usuarioLogado = JSON.parse(localStorage.getItem('gastei_usuario'));
     if (!usuarioLogado) window.location.href = 'login.html';
 
-    // Mostra nome do usuário no header
     document.getElementById('usuario-nome').textContent = `👤 ${usuarioLogado.nome}`;
 
     function logout() {
@@ -250,25 +253,35 @@
             tipo === 'credito' ? 'block' : 'none';
     }
 
-    async function salvarRenda() {
-        const valor = parseFloat(document.getElementById('renda-valor').value);
+    async function ajustarRenda(operacao) {
+        const ajuste = parseFloat(document.getElementById('renda-valor').value);
         const mes = document.getElementById('renda-mes').value;
 
-        if (!valor || valor <= 0 || !mes) {
-            alert('Informe um valor válido para a renda!');
+        if (!ajuste || ajuste <= 0 || !mes) {
+            alert('Informe um valor válido!');
             return;
         }
 
-        // Tenta atualizar primeiro, se não existir insere
+        // Busca renda atual do mês
         const resCheck = await fetch(
             `${SUPABASE_URL}/rest/v1/rendas?usuario_id=eq.${usuarioLogado.id}&mes_referencia=eq.${mes}`,
             { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
         );
         const rendaExistente = await resCheck.json();
 
+        const rendaAtual = rendaExistente.length > 0 ? parseFloat(rendaExistente[0].valor) : 0;
+        let novoValor = operacao === 'adicionar' ? rendaAtual + ajuste : rendaAtual - ajuste;
+
+        // Não deixa ficar negativo
+        if (novoValor < 0) {
+            alert('❌ A renda não pode ficar negativa!');
+            return;
+        }
+
+        novoValor = parseFloat(novoValor.toFixed(2));
+
         let res;
         if (rendaExistente.length > 0) {
-            // Atualiza
             res = await fetch(
                 `${SUPABASE_URL}/rest/v1/rendas?usuario_id=eq.${usuarioLogado.id}&mes_referencia=eq.${mes}`,
                 {
@@ -278,11 +291,10 @@
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`
                     },
-                    body: JSON.stringify({ valor })
+                    body: JSON.stringify({ valor: novoValor })
                 }
             );
         } else {
-            // Insere
             res = await fetch(`${SUPABASE_URL}/rest/v1/rendas`, {
                 method: 'POST',
                 headers: {
@@ -292,17 +304,17 @@
                 },
                 body: JSON.stringify({
                     usuario_id: usuarioLogado.id,
-                    valor,
+                    valor: novoValor,
                     mes_referencia: mes
                 })
             });
         }
 
         if (res.ok) {
-            alert('✅ Renda salva com sucesso!');
+            document.getElementById('renda-valor').value = '';
             carregarTudo();
         } else {
-            alert('❌ Erro ao salvar renda.');
+            alert('❌ Erro ao atualizar renda.');
         }
     }
 
@@ -373,10 +385,7 @@
         if (!confirm('Deseja remover este gasto?')) return;
         await fetch(`${SUPABASE_URL}/rest/v1/gastos?id=eq.${id}`, {
             method: 'DELETE',
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`
-            }
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
         carregarTudo();
     }
@@ -384,7 +393,6 @@
     async function carregarTudo() {
         const mes = document.getElementById('filtro-mes').value;
 
-        // Carrega renda e gastos em paralelo
         const [renda, gastos] = await Promise.all([
             carregarRenda(mes),
             fetch(
@@ -393,15 +401,13 @@
             ).then(r => r.json())
         ]);
 
-        // Atualiza campo de renda
-        document.getElementById('renda-valor').value = renda > 0 ? renda : '';
+        // Atualiza texto da renda atual
+        document.getElementById('renda-atual-texto').textContent =
+            `Renda atual do mês: R$ ${renda.toFixed(2).replace('.', ',')}`;
         document.getElementById('total-renda').textContent =
             `R$ ${renda.toFixed(2).replace('.', ',')}`;
 
-        // Calcula total de gastos
         const totalGastos = gastos.reduce((s, g) => s + parseFloat(g.valor), 0);
-
-        // Calcula saldo
         const saldo = renda - totalGastos;
         const saldoEl = document.getElementById('total-saldo');
         const cardSaldo = document.getElementById('card-saldo');
@@ -416,7 +422,6 @@
             document.querySelector('#card-saldo h3').textContent = '⚠️ Saldo Negativo';
         }
 
-        // Lista gastos
         const lista = document.getElementById('lista-gastos');
         if (!gastos.length) {
             lista.innerHTML = '<div class="empty">Nenhum gasto registrado neste mês 😊</div>';
@@ -439,7 +444,6 @@
             `).join('');
         }
 
-        // Totais por tipo
         const tipos = ['credito', 'debito', 'pix', 'dinheiro'];
         tipos.forEach(t => {
             const total = gastos
@@ -449,7 +453,6 @@
                 `R$ ${total.toFixed(2).replace('.', ',')}`;
         });
 
-        // Fatura crédito
         const fatura = gastos
             .filter(g => g.tipo_pagamento === 'credito')
             .reduce((s, g) => s + parseFloat(g.valor), 0);
