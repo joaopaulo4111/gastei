@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gastei - Controle de Gastos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
@@ -35,7 +36,6 @@
         .valor.positivo { color: #10b981; }
         .valor.negativo { color: #ef4444; }
 
-        /* Renda section */
         .renda-section { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #22d3ee; }
         .renda-section h2 { color: #22d3ee; font-size: 1rem; margin-bottom: 4px; }
         .renda-section .renda-atual { font-size: 0.85rem; color: #64748b; margin-bottom: 14px; }
@@ -50,7 +50,6 @@
         .btn-subtrair-renda { padding: 10px 18px; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; white-space: nowrap; }
         .btn-subtrair-renda:hover { opacity: 0.9; }
 
-        /* Meta section */
         .meta-section { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 24px; border-left: 4px solid #f59e0b; }
         .meta-section h2 { color: #f59e0b; font-size: 1rem; margin-bottom: 4px; }
         .meta-section .meta-status-texto { font-size: 0.85rem; margin-bottom: 14px; }
@@ -100,6 +99,22 @@
         .loading { text-align: center; color: #475569; padding: 20px; }
         .btn-deletar { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 4px; }
         .btn-deletar:hover { background: #450a0a; }
+
+        /* Gráfico de pizza */
+        .grafico-section { background: #1e293b; border-radius: 12px; padding: 24px; margin-top: 24px; border-left: 4px solid #22d3ee; }
+        .grafico-section h2 { color: #22d3ee; font-size: 1.1rem; margin-bottom: 4px; }
+        .grafico-section .subtitulo { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; }
+        .grafico-container { display: flex; gap: 32px; align-items: center; flex-wrap: wrap; }
+        .grafico-canvas { max-width: 280px; max-height: 280px; margin: 0 auto; }
+        .grafico-legenda { flex: 1; min-width: 200px; }
+        .legenda-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #0f172a; }
+        .legenda-item:last-child { border-bottom: none; }
+        .legenda-cor { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+        .legenda-info { flex: 1; }
+        .legenda-cat { font-size: 0.9rem; font-weight: 500; }
+        .legenda-val { font-size: 0.8rem; color: #64748b; }
+        .legenda-pct { font-size: 0.85rem; font-weight: bold; color: #94a3b8; }
+        .grafico-empty { text-align: center; color: #475569; padding: 40px; }
 
         /* Limites por categoria */
         .limites-section { background: #1e293b; border-radius: 12px; padding: 24px; margin-top: 24px; border-left: 4px solid #6366f1; }
@@ -281,6 +296,15 @@
         <div class="fatura-total" id="fatura-total">R$ 0,00</div>
     </div>
 
+    <!-- Gráfico de Pizza -->
+    <div class="grafico-section">
+        <h2>📊 Gastos por Categoria</h2>
+        <p class="subtitulo">Distribuição dos gastos do mês selecionado por categoria.</p>
+        <div id="grafico-container">
+            <div class="grafico-empty">Nenhum gasto registrado neste mês.</div>
+        </div>
+    </div>
+
     <!-- Limites por Categoria -->
     <div class="limites-section">
         <h2>🎯 Limites por Categoria</h2>
@@ -331,6 +355,18 @@
     document.getElementById('filtro-mes').value = mesAtual;
     document.getElementById('renda-mes').value = mesAtual;
     document.getElementById('meta-mes').value = mesAtual;
+
+    let graficoPizza = null;
+
+    const CORES_CATEGORIAS = {
+        'Alimentação': '#f59e0b',
+        'Transporte':  '#3b82f6',
+        'Saúde':       '#10b981',
+        'Lazer':       '#8b5cf6',
+        'Educação':    '#22d3ee',
+        'Moradia':     '#f97316',
+        'Outros':      '#64748b'
+    };
 
     async function carregarCotacao() {
         try {
@@ -390,8 +426,6 @@
         return rendas.length > 0 ? parseFloat(rendas[0].valor) : 0;
     }
 
-    // ── Meta de Economia ──────────────────────────────────────────────────
-
     async function salvarMeta() {
         const valor = parseFloat(document.getElementById('meta-valor').value);
         const mes = document.getElementById('meta-mes').value;
@@ -416,7 +450,6 @@
                 body: JSON.stringify({ usuario_id: usuarioLogado.id, valor, mes_referencia: mes })
             });
         }
-
         if (res.ok) { document.getElementById('meta-valor').value = ''; carregarTudo(); }
         else alert('❌ Erro ao salvar meta.');
     }
@@ -433,19 +466,15 @@
     function atualizarStatusMeta(meta, renda, totalGastos) {
         const msg = document.getElementById('meta-msg');
         const statusTexto = document.getElementById('meta-status-texto');
-
         if (meta <= 0) {
             msg.style.display = 'none';
             statusTexto.textContent = 'Defina quanto quer economizar este mês.';
             statusTexto.style.color = '#64748b';
             return;
         }
-
         const economiaAtual = renda - totalGastos;
         const faltam = meta - economiaAtual;
-
         statusTexto.textContent = `Meta: economizar R$ ${meta.toFixed(2).replace('.', ',')} | Economizado até agora: R$ ${economiaAtual > 0 ? economiaAtual.toFixed(2).replace('.', ',') : '0,00'}`;
-
         if (economiaAtual >= meta) {
             msg.className = 'meta-msg atingida';
             msg.textContent = `🎉 Parabéns! Você atingiu sua meta de economia de R$ ${meta.toFixed(2).replace('.', ',')}!`;
@@ -456,6 +485,81 @@
             msg.className = 'meta-msg ultrapassada';
             msg.textContent = `⚠️ Atenção! Você ainda precisa economizar R$ ${faltam.toFixed(2).replace('.', ',')} para bater a meta.`;
         }
+    }
+
+    // ── Gráfico de Pizza ──────────────────────────────────────────────────
+
+    function renderGraficoPizza(gastos) {
+        const container = document.getElementById('grafico-container');
+
+        if (!gastos.length) {
+            if (graficoPizza) { graficoPizza.destroy(); graficoPizza = null; }
+            container.innerHTML = '<div class="grafico-empty">Nenhum gasto registrado neste mês.</div>';
+            return;
+        }
+
+        // Agrupa por categoria
+        const totaisPorCategoria = {};
+        gastos.forEach(g => {
+            totaisPorCategoria[g.categoria] = (totaisPorCategoria[g.categoria] || 0) + parseFloat(g.valor);
+        });
+
+        const categorias = Object.keys(totaisPorCategoria);
+        const valores = categorias.map(c => totaisPorCategoria[c]);
+        const cores = categorias.map(c => CORES_CATEGORIAS[c] || '#64748b');
+        const totalGeral = valores.reduce((s, v) => s + v, 0);
+
+        // Reconstrói o HTML do container
+        container.innerHTML = `
+            <div class="grafico-container">
+                <div class="grafico-canvas">
+                    <canvas id="pizzaChart"></canvas>
+                </div>
+                <div class="grafico-legenda" id="grafico-legenda"></div>
+            </div>
+        `;
+
+        // Destroi gráfico anterior se existir
+        if (graficoPizza) { graficoPizza.destroy(); graficoPizza = null; }
+
+        const ctx = document.getElementById('pizzaChart').getContext('2d');
+        graficoPizza = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: categorias,
+                datasets: [{
+                    data: valores,
+                    backgroundColor: cores,
+                    borderColor: '#0f172a',
+                    borderWidth: 3,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` R$ ${ctx.parsed.toFixed(2).replace('.', ',')} (${((ctx.parsed / totalGeral) * 100).toFixed(1)}%)`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Legenda personalizada
+        const legenda = document.getElementById('grafico-legenda');
+        legenda.innerHTML = categorias.map((cat, i) => `
+            <div class="legenda-item">
+                <div class="legenda-cor" style="background:${cores[i]}"></div>
+                <div class="legenda-info">
+                    <div class="legenda-cat">${cat}</div>
+                    <div class="legenda-val">R$ ${valores[i].toFixed(2).replace('.', ',')}</div>
+                </div>
+                <div class="legenda-pct">${((valores[i] / totalGeral) * 100).toFixed(1)}%</div>
+            </div>
+        `).join('');
     }
 
     // ── Gastos ────────────────────────────────────────────────────────────
@@ -512,13 +616,10 @@
 
         document.getElementById('renda-atual-texto').textContent = `Renda atual do mês: R$ ${renda.toFixed(2).replace('.', ',')}`;
         document.getElementById('total-renda').textContent = `R$ ${renda.toFixed(2).replace('.', ',')}`;
-
-        // Atualiza campo meta se já tiver valor salvo
         if (meta > 0) document.getElementById('meta-valor').value = meta;
 
         const totalGastos = gastos.reduce((s, g) => s + parseFloat(g.valor), 0);
 
-        // Saldo
         const saldo = renda - totalGastos;
         const saldoEl = document.getElementById('total-saldo');
         const cardSaldo = document.getElementById('card-saldo');
@@ -533,10 +634,9 @@
             document.querySelector('#card-saldo h3').textContent = '⚠️ Saldo Negativo';
         }
 
-        // Status da meta
         atualizarStatusMeta(meta, renda, totalGastos);
+        renderGraficoPizza(gastos);
 
-        // Lista gastos
         const lista = document.getElementById('lista-gastos');
         if (!gastos.length) {
             lista.innerHTML = '<div class="empty">Nenhum gasto registrado neste mês 😊</div>';
