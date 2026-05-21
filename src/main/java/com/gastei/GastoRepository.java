@@ -1,5 +1,4 @@
 package com.gastei;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.*;
@@ -29,5 +28,9 @@ public class GastoRepository {
         } catch (IOException e) {
             return new ArrayList<>();
         }
+    }
+
+    public List<Gasto> listarTodos() {
+        return carregar();
     }
 }
