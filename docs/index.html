@@ -84,6 +84,38 @@
         .loading { text-align: center; color: #475569; padding: 20px; }
         .btn-deletar { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 4px; }
         .btn-deletar:hover { background: #450a0a; }
+
+        /* ── Limites por categoria ── */
+        .limites-section { background: #1e293b; border-radius: 12px; padding: 24px; margin-top: 24px; border-left: 4px solid #6366f1; }
+        .limites-section h2 { color: #818cf8; font-size: 1.1rem; margin-bottom: 4px; }
+        .limites-section .subtitulo { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; }
+        .limites-form { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; }
+        .limites-form .form-group { flex: 1; min-width: 140px; margin: 0; }
+        .limites-form label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px; }
+        .limites-form input, .limites-form select { width: 100%; padding: 10px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; }
+        .limites-form input:focus, .limites-form select:focus { outline: none; border-color: #6366f1; }
+        .btn-salvar-limite { padding: 10px 18px; background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .btn-salvar-limite:hover { opacity: 0.9; }
+        .btn-remover-limite { padding: 10px 18px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #94a3b8; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .btn-remover-limite:hover { border-color: #ef4444; color: #ef4444; }
+        .limites-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+        .limite-card { background: #0f172a; border-radius: 10px; padding: 16px; border: 1px solid #1e293b; transition: border-color 0.2s; }
+        .limite-card.status-aviso { border-color: #854d0e; }
+        .limite-card.status-critico { border-color: #7f1d1d; }
+        .limite-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .limite-card-cat { font-size: 0.95rem; font-weight: 600; }
+        .limite-card-valores { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
+        .limite-status-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; letter-spacing: 0.03em; white-space: nowrap; }
+        .badge-ok { background: #022c22; color: #10b981; }
+        .badge-aviso { background: #422006; color: #f59e0b; }
+        .badge-critico { background: #450a0a; color: #ef4444; }
+        .progress-track { height: 6px; background: #1e293b; border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+        .progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+        .progress-fill.ok { background: #10b981; }
+        .progress-fill.aviso { background: #f59e0b; }
+        .progress-fill.critico { background: #ef4444; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #475569; }
+        .limites-empty { text-align: center; color: #475569; padding: 28px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -213,6 +245,37 @@
             Total de parcelas de crédito vencendo no mês selecionado
         </p>
         <div class="fatura-total" id="fatura-total">R$ 0,00</div>
+    </div>
+
+    <!-- ── Limites por Categoria ── -->
+    <div class="limites-section">
+        <h2>🎯 Limites por Categoria</h2>
+        <p class="subtitulo">Defina um teto mensal por categoria e acompanhe o progresso.</p>
+
+        <div class="limites-form">
+            <div class="form-group">
+                <label>Categoria</label>
+                <select id="limite-cat">
+                    <option value="Alimentação">🍔 Alimentação</option>
+                    <option value="Transporte">🚗 Transporte</option>
+                    <option value="Saúde">💊 Saúde</option>
+                    <option value="Lazer">🎮 Lazer</option>
+                    <option value="Educação">📚 Educação</option>
+                    <option value="Moradia">🏠 Moradia</option>
+                    <option value="Outros">📦 Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Limite mensal (R$)</label>
+                <input type="number" id="limite-valor" placeholder="Ex: 500.00" step="0.01" min="0">
+            </div>
+            <button class="btn-salvar-limite" onclick="salvarLimite()">💾 Salvar</button>
+            <button class="btn-remover-limite" onclick="removerLimite()">🗑️ Remover</button>
+        </div>
+
+        <div class="limites-grid" id="limites-grid">
+            <div class="limites-empty">Nenhum limite definido ainda.</div>
+        </div>
     </div>
 </div>
 
@@ -462,6 +525,95 @@
 
     carregarCotacao();
     carregarTudo();
+
+    // ── Limites por Categoria ──────────────────────────────────────────────
+
+    function getLimites() {
+        return JSON.parse(localStorage.getItem('gastei_limites_' + usuarioLogado.id) || '[]');
+    }
+
+    function setLimites(limites) {
+        localStorage.setItem('gastei_limites_' + usuarioLogado.id, JSON.stringify(limites));
+    }
+
+    function salvarLimite() {
+        const cat = document.getElementById('limite-cat').value;
+        const val = parseFloat(document.getElementById('limite-valor').value);
+        if (!val || val <= 0) { alert('Informe um valor maior que zero.'); return; }
+
+        const limites = getLimites().filter(l => l.categoria !== cat);
+        limites.push({ categoria: cat, limite: val });
+        setLimites(limites);
+        document.getElementById('limite-valor').value = '';
+        renderLimites();
+    }
+
+    function removerLimite() {
+        const cat = document.getElementById('limite-cat').value;
+        const limites = getLimites().filter(l => l.categoria !== cat);
+        setLimites(limites);
+        renderLimites();
+    }
+
+    async function renderLimites() {
+        const grid = document.getElementById('limites-grid');
+        const limites = getLimites();
+        if (!limites.length) {
+            grid.innerHTML = '<div class="limites-empty">Nenhum limite definido ainda.</div>';
+            return;
+        }
+
+        // Busca gastos do mês atual para calcular totais por categoria
+        const mes = document.getElementById('filtro-mes').value;
+        const res = await fetch(
+            `${SUPABASE_URL}/rest/v1/gastos?mes_referencia=eq.${mes}&usuario_id=eq.${usuarioLogado.id}`,
+            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }}
+        );
+        const gastos = await res.json();
+
+        grid.innerHTML = limites.map(l => {
+            const gasto = gastos
+                .filter(g => g.categoria === l.categoria)
+                .reduce((s, g) => s + parseFloat(g.valor), 0);
+            const pct = Math.min((gasto / l.limite) * 100, 100);
+            const pctReal = ((gasto / l.limite) * 100).toFixed(1);
+            const restante = (l.limite - gasto).toFixed(2).replace('.', ',');
+
+            let status, barClass, badgeClass, badgeText;
+            if (pct >= 100)      { status = 'critico'; barClass = 'critico'; badgeClass = 'badge-critico'; badgeText = '🔴 Limite atingido'; }
+            else if (pct >= 80)  { status = 'aviso';   barClass = 'aviso';   badgeClass = 'badge-aviso';   badgeText = '🟡 80% atingido'; }
+            else                 { status = 'ok';      barClass = 'ok';      badgeClass = 'badge-ok';      badgeText = '🟢 OK'; }
+
+            return `
+            <div class="limite-card status-${status}">
+                <div class="limite-card-top">
+                    <div>
+                        <div class="limite-card-cat">${l.categoria}</div>
+                        <div class="limite-card-valores">
+                            R$ ${gasto.toFixed(2).replace('.', ',')} de R$ ${l.limite.toFixed(2).replace('.', ',')}
+                        </div>
+                    </div>
+                    <span class="limite-status-badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill ${barClass}" style="width:${pct}%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span>${pctReal}% utilizado</span>
+                    <span>R$ ${restante} restante</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Chama renderLimites junto com carregarTudo para manter sincronia
+    const _carregarTudoOriginal = carregarTudo;
+    carregarTudo = async function() {
+        await _carregarTudoOriginal();
+        renderLimites();
+    };
+
+    renderLimites();
 </script>
 </body>
 </html>
