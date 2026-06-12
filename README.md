@@ -1,94 +1,123 @@
-# 💸 Gastei — Controle de Gastos Pessoais
+<div align="center">
 
-![CI](https://github.com/joaopaulo4111/gastei/actions/workflows/ci.yml/badge.svg)
-[![Deploy](https://img.shields.io/badge/deploy-GitHub%20Pages-blue)](https://joaopaulo4111.github.io/gastei)
+# 💸 Gastei
 
-🌐 **Aplicação publicada:** https://joaopaulo4111.github.io/gastei
+**Controle de gastos pessoais simples, rápido e sem complicação.**
 
-## 📋 Problema Real
-Muitas pessoas têm dificuldade em controlar seus gastos diários, o que leva a
-desequilíbrios financeiros ao final do mês. A falta de registro simples e acessível
-contribui para o endividamento e a desorganização financeira.
+[![CI](https://github.com/joaopaulo4111/gastei/actions/workflows/ci.yml/badge.svg)](https://github.com/joaopaulo4111/gastei/actions)
+[![Deploy](https://img.shields.io/badge/deploy-GitHub%20Pages-0075FF?logo=github)](https://joaopaulo4111.github.io/gastei)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![Maven](https://img.shields.io/badge/Maven-3.9+-C71A36?logo=apachemaven&logoColor=white)](https://maven.apache.org/)
+[![Version](https://img.shields.io/badge/versão-1.0.1-brightgreen)](https://github.com/joaopaulo4111/gastei/releases)
 
-## 💡 Solução
-Aplicação web com interface moderna que permite registrar, categorizar e totalizar
-gastos pessoais por forma de pagamento, com suporte a parcelamento no crédito e
-visualização da fatura mensal. Os dados são salvos em banco de dados na nuvem (Supabase).
+🌐 **[Acesse a aplicação →](https://joaopaulo4111.github.io/gastei)**
 
-## 👥 Público-alvo
-Qualquer pessoa que queira controlar gastos de forma rápida e sem complicação,
-especialmente jovens e estudantes que estão aprendendo a organizar as finanças.
+</div>
+
+---
+
+## 📋 Sobre o projeto
+
+Muitas pessoas têm dificuldade em acompanhar seus gastos do dia a dia, o que leva a desequilíbrios financeiros no fim do mês. O **Gastei** resolve isso com uma interface web moderna e intuitiva que permite registrar, categorizar e visualizar gastos pessoais em segundos — sem cadastros complicados.
+
+Os dados ficam persistidos em banco de dados na nuvem (Supabase/PostgreSQL), acessíveis de qualquer dispositivo.
+
+---
 
 ## ✅ Funcionalidades
-- Adicionar gastos com descrição, valor e categoria
-- Separação por forma de pagamento: Crédito, Débito, PIX e Dinheiro
-- Parcelamento no crédito com lançamento automático mês a mês
-- Visualização da fatura mensal do cartão de crédito
-- Resumo dos gastos por tipo de pagamento
-- Cotação do dólar em tempo real via AwesomeAPI
-- Persistência de dados em banco de dados PostgreSQL na nuvem (Supabase)
-- Interface web moderna e responsiva
+
+- **Registro de gastos** com descrição, valor e categoria
+- **Múltiplas formas de pagamento:** Crédito, Débito, PIX e Dinheiro
+- **Parcelamento no crédito** com lançamento automático mês a mês
+- **Fatura mensal** do cartão de crédito
+- **Resumo consolidado** de gastos por tipo de pagamento
+- **Cotação do dólar em tempo real** via AwesomeAPI
+- **Persistência em nuvem** com banco PostgreSQL (Supabase)
+- **Interface responsiva** — funciona no celular e no desktop
+
+---
 
 ## 🛠️ Tecnologias
-- Java 21
-- Maven 3.9+
-- Gson 2.10.1
-- JUnit Jupiter 5.10.0
-- Checkstyle (linting)
-- GitHub Actions (CI)
-- Supabase (PostgreSQL na nuvem)
-- HTML / CSS / JavaScript (interface web)
-- AwesomeAPI (cotação de moedas)
-- GitHub Pages (deploy)
+
+| Camada | Tecnologias |
+|--------|------------|
+| Back-end | Java 21, Maven 3.9+, Gson 2.10.1 |
+| Front-end | HTML, CSS, JavaScript |
+| Banco de dados | Supabase (PostgreSQL na nuvem) |
+| Testes | JUnit Jupiter 5.10.0 |
+| Qualidade | Checkstyle (linting) |
+| CI/CD | GitHub Actions, GitHub Pages |
+| API externa | AwesomeAPI (cotação de moedas) |
+
+---
 
 ## ⚙️ Pré-requisitos
-- Java 21 instalado
-- Maven 3.9+ instalado
 
-## 📦 Instalação
+- [Java 21](https://www.oracle.com/java/technologies/downloads/)
+- [Maven 3.9+](https://maven.apache.org/download.cgi)
 
+---
+
+## 🚀 Como rodar localmente
+
+**1. Clone o repositório**
 ```bash
 git clone https://github.com/joaopaulo4111/gastei.git
 cd gastei
+```
+
+**2. Compile o projeto**
+```bash
 mvn compile
 ```
 
-## ▶️ Como executar (CLI)
-
+**3. Execute a aplicação (CLI)**
 ```bash
 mvn exec:java "-Dexec.mainClass=com.gastei.Main"
 ```
 
-## 🌐 Como usar (Interface Web)
+> Prefere usar pelo navegador? Acesse direto em **[joaopaulo4111.github.io/gastei](https://joaopaulo4111.github.io/gastei)** — sem instalar nada.
 
-Acesse diretamente pelo navegador:
-👉 https://joaopaulo4111.github.io/gastei
+---
 
-## 🧪 Rodar os testes
+## 🧪 Testes e qualidade
 
+**Rodar os testes:**
 ```bash
 mvn test
 ```
 
-## 🔍 Rodar o lint (Checkstyle)
-
+**Rodar o lint (Checkstyle):**
 ```bash
 mvn checkstyle:check
 ```
 
-## 🗄️ Banco de Dados
-O projeto utiliza **Supabase** (PostgreSQL na nuvem) para persistência dos dados.
-A tabela `gastos` armazena descrição, valor, categoria, tipo de pagamento,
-parcelas e mês de referência.
+---
 
-## 👥 Integrantes
+## 🗄️ Banco de dados
+
+O projeto utiliza **[Supabase](https://supabase.com/)** (PostgreSQL gerenciado na nuvem) para persistência dos dados. A tabela `gastos` armazena:
+
+| Campo | Descrição |
+|-------|-----------|
+| `descricao` | Nome/descrição do gasto |
+| `valor` | Valor em reais |
+| `categoria` | Categoria do gasto |
+| `tipo_pagamento` | Crédito, Débito, PIX ou Dinheiro |
+| `parcelas` | Número de parcelas (crédito) |
+| `mes_referencia` | Mês de competência do lançamento |
+
+---
+
+## 👥 Equipe
+
 | Nome | GitHub |
-|------|-------|
+|------|--------|
 | João Paulo Castro dos Santos | [@joaopaulo4111](https://github.com/joaopaulo4111) |
 | Lucas Gabriel Castro dos Santos | [@lucas-castro5](https://github.com/lucas-castro5) |
 
-## 📌 Versão
-1.0.1
+---
 
-## 🔗 Repositório
-https://github.com/joaopaulo4111/gastei
+## 📄 Licença
+
+Este projeto está sob licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
